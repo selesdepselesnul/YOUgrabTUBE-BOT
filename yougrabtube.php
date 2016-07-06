@@ -16,7 +16,7 @@ $chat = $message->getChat();
 $query = parse_url($message->getText())['query'];
 parse_str($query, $arrQuery);
 $videoId = $arrQuery['v'];
-$response = Unirest\Request::get("https://ytgrabber.p.mashape.com/app/get/".$videoId,
+$response = Unirest\Request::get($config['downloader_end_point'].$videoId,
   [
     "X-Mashape-Key" => $config['mashape_key'],
     "Accept" => "application/json"
@@ -28,7 +28,7 @@ $links = $response->body->link;
 foreach ($links as $link) {
     
     $response = Unirest\Request::get(
-      "https://sjehutch-passbeemedia-shorturl.p.mashape.com/CreateUrl?real_url=".$link->url,
+      $config['shortener_end_point'].$link->url,
       array(
         "X-Mashape-Key" => $config['mashape_key'],
         "Accept" => "application/xml"
