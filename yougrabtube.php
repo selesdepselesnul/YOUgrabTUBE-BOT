@@ -69,18 +69,24 @@ class YouGrabTube {
             $this->downloadLinks = YoutubeLinkGenerator::generate(
                         $this->config['mashape_key'], 
                         $this->message->getText()); 
+            if(empty($this->downloadLinks)) {
+                $this->sendMessage('yes '.$this->getNickName()
+                  .' that was youtube url, but i think that not the valid one :(');
+            } else {
+                $this->sendMessage(
+                  'Ok '.$this->getNickName()
+                  .', here i give u some links to download the video :');
 
-            $this->sendMessage(
-              'Ok '.$this->getNickName()
-              .', here i give u some links to download the video :');
+                $this->sendDownloadLinks();
+              
+                $this->sendMessage('click the link and klik ok when telegram ask you !');    
+            }
 
-            $this->sendDownloadLinks();
-          
-            $this->sendMessage('click the link and klik ok when telegram ask you !');  
+            
         } else {
             $this->sendMessage(
-              '<b>WTF r u talkin bout ?'
-              .PHP_EOL.'do u speak properly dude ?</b>');
+              '<b>WTF R U talkin bout ?'
+              .PHP_EOL.'do U speak properly, dude ?</b>');
         }
 
     }
