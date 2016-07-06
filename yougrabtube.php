@@ -25,9 +25,9 @@ $response = Unirest\Request::get($config['downloader_end_point'].$videoId,
 
 $links = $response->body->link;
 
-foreach ($links as $link) {
-    
-    $response = Unirest\Request::get(
+for ($i=0; $i < count($links)-1 ; $i++) { 
+  $link = $links[$i];
+  $response = Unirest\Request::get(
       $config['shortener_end_point'].$link->url,
       array(
         "X-Mashape-Key" => $config['mashape_key'],
@@ -35,12 +35,19 @@ foreach ($links as $link) {
       )
     );
     
+    var_dump($link);
     $type = $link->type;
     $format = $type->format;
     $quality = $type->quality;
     $shortener = simplexml_load_string($response->raw_body);
     $shortUrl = (string)$shortener->ShortUrl;
 
+    if($i == 0)
+      $response = $telegram->sendMessage([
+        'chat_id' => $chat->getId(), 
+        'text' => "Enjoy your video !",
+      ]);
+  
     $response = $telegram->sendMessage([
       'chat_id' => $chat->getId(), 
       'text' => "format : $format, quality : $quality, dl-url: $shortUrl",
@@ -49,7 +56,32 @@ foreach ($links as $link) {
     $messageId = $response->getMessageId();
 
     echo $messageId;
-
 }
+// foreach ($links as $link) {
+    
+//     $response = Unirest\Request::get(
+//       $config['shortener_end_point'].$link->url,
+//       array(
+//         "X-Mashape-Key" => $config['mashape_key'],
+//         "Accept" => "application/xml"
+//       )
+//     );
+    
+//     $type = $link->type;
+//     $format = $type->format;
+//     $quality = $type->quality;
+//     $shortener = simplexml_load_string($response->raw_body);
+//     $shortUrl = (string)$shortener->ShortUrl;
+
+//     $response = $telegram->sendMessage([
+//       'chat_id' => $chat->getId(), 
+//       'text' => "format : $format, quality : $quality, dl-url: $shortUrl",
+//     ]);
+
+//     $messageId = $response->getMessageId();
+
+//     echo $messageId;
+
+// }
 
 
