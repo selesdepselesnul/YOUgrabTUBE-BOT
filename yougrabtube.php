@@ -46,12 +46,14 @@ class YouGrabTube {
 
 
     private function sendMessage($message) {
-        $this->telegram->sendMessage([
-          'chat_id' => $this->chat->getId(),
-          'parse_mode' => 'HTML', 
-          'text' => PHP_EOL
-              .$message
-              .PHP_EOL]);
+        $message = 
+          $this->telegram->sendMessage([
+              'chat_id' => $this->chat->getId(),
+              'parse_mode' => 'HTML', 
+              'text' => PHP_EOL
+                  .$message
+                  .PHP_EOL]);
+        return $message;
     }
 
     private function makeDownloadLinks() {
@@ -64,16 +66,33 @@ class YouGrabTube {
                       .PHP_EOL;
             });
         return $downloadLinks;
-        // foreach ($this->downloadLinks as $i => $downloadLink) {
-        //     $this->sendMessage('<b>'.($i + 1).'. </b><a href="'
-        //           .$this->makeUrlShort($downloadLink['url']).'">'
-        //           .$downloadLink['format'].' '.$downloadLink['quality']
-        //           .'</a>');
-        // }
     }
 
+    private function updateLastUserMessage($id) {
+          $conn = new PDO(
+            "mysql:host=".$this->config['host']
+            .";dbname=".$this->config['database']
+            , $this->config['user'], 
+            $this->config['password']);
+
+          
+          $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+          $stmt = $conn->prepare(
+            "UPDATE last_user_message  
+             SET id = :id");
+
+          $stmt->bindParam(':id', $id);
+     
+          $stmt->execute();
+    }
+
+
     public function start() {
- 
+        
+
+        $this->updateLastUserMessage($this->message->getMessageId());
+          
         if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
             $this->downloadLinks = YoutubeLinkGenerator::generate(
                         $this->config['mashape_key'], 
@@ -82,19 +101,22 @@ class YouGrabTube {
                 $this->sendMessage('yes '.$this->getNickName()
                   .' that was youtube url, but i think that not the valid one :(');
             } else {
+
                 $headerMessage = 
                       PHP_EOL
-                      .'Ok '.$this->getNickName()
-                      .', here i give u some links to download the video :'
+                      .'<b>Ok '.$this->getNickName()
+                      .', here i give u some links to download the video :</b>'
                       .PHP_EOL;
 
-                $footerMessage = 'click the link and klik ok when telegram ask you !'.PHP_EOL;
+                $footerMessage = '<b>click the link and klik ok when telegram ask you !</b>'.PHP_EOL;
                 
-                $this->sendMessage(
+                $message = $this->sendMessage(
                     $headerMessage
                     .$this->makeDownloadLinks()
                     .$footerMessage
                 );
+
+                var_dump($message->getMessageId());
     
             }
             
