@@ -8,7 +8,6 @@ use Telegram\Bot\Api;
 
 class YouGrabTube {
 
-
     public function __construct($config) {
         
         $this->config = $config;
@@ -17,13 +16,10 @@ class YouGrabTube {
         $response = $this->telegram->getUpdates(
           ['offset' => -1, 'limit' => 1, 'timeout' => 0]);
 
-        $message = $response[0]->getMessage();
-        $this->user = $message->getFrom();
-        $this->chat = $message->getChat();
+        $this->message = $response[0]->getMessage();
+        $this->user = $this->message->getFrom();
+        $this->chat = $this->message->getChat();
             
-        $this->downloadLinks = YoutubeLinkGenerator::generate(
-                        $this->config['mashape_key'], 
-                        $message->getText());   
 
     }
 
@@ -68,16 +64,27 @@ class YouGrabTube {
     }
 
     public function start() {
-        
-        $this->sendMessage(
-          'Ok '.$this->getNickName()
-          .', here i give u some links to download the video :');
+ 
+        if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
+            $this->downloadLinks = YoutubeLinkGenerator::generate(
+                        $this->config['mashape_key'], 
+                        $this->message->getText()); 
 
-        $this->sendDownloadLinks();
-      
-        $this->sendMessage('click the link and klik ok when telegram ask you !');
+            $this->sendMessage(
+              'Ok '.$this->getNickName()
+              .', here i give u some links to download the video :');
+
+            $this->sendDownloadLinks();
+          
+            $this->sendMessage('click the link and klik ok when telegram ask you !');  
+        } else {
+            $this->sendMessage(
+              '<b>WTF r u talkin bout ?'
+              .PHP_EOL.'do u speak properly dude ?</b>');
+        }
 
     }
+
 }
 
 $youGrabTube = new YouGrabTube($config);
