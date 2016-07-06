@@ -1,26 +1,13 @@
 #!/usr/bin/env php
 <?php
 require __DIR__ . '/vendor/autoload.php';
+use Telegram\Bot\Api;
 
-$API_KEY = 'your_bot_api_key';
-$BOT_NAME = 'namebot';
-$mysql_credentials = [
-   'host'     => 'localhost',
-   'user'     => 'dbuser',
-   'password' => 'dbpass',
-   'database' => 'dbname',
-];
+$config = parse_ini_file('yougrabtube.ini');
 
-try {
-    // Create Telegram API object
-    $telegram = new Longman\TelegramBot\Telegram($API_KEY, $BOT_NAME);
+$telegram = new Api($config['api_key']);
 
-    // Enable MySQL
-    $telegram->enableMySQL($mysql_credentials);
-
-    // Handle telegram getUpdate request
-    $telegram->handleGetUpdates();
-} catch (Longman\TelegramBot\Exception\TelegramException $e) {
-    // log telegram errors
-    echo $e;
-}
+$response = $telegram->getUpdates(
+  ['offset' => -1, 'limit' => 1, 'timeout' => 0]);
+$update = $response[0];
+print_r($response[0]->getMessage());
