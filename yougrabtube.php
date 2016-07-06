@@ -93,13 +93,14 @@ var_dump($userMessage);
 $downloadLinks = YoutubeLinkGenerator::generate($config['mashape_key'], 
                                                         $userMessage);
 
-foreach ($downloadLinks as $downloadLink) {
+foreach ($downloadLinks as $i => $downloadLink) {
     $telegram->sendMessage([
       'chat_id' => $chat->getId(),
       'parse_mode' => 'HTML', 
-      'text' => 'format : '.$downloadLink['format']
-              .PHP_EOL.'quality : '.$downloadLink['quality']
-              .PHP_EOL.'dl-url : '.$downloadLink['url'].PHP_EOL
+      'text' => PHP_EOL
+          .'<b>'.($i + 1).'. </b><a href="'.makeUrlShort($downloadLink['url']).'">'
+          .$downloadLink['format'].' '.$downloadLink['quality']
+          .'</a>'.PHP_EOL
     ]);      
 }
 
