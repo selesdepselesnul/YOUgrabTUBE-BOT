@@ -30,13 +30,14 @@ foreach ($links as $link) {
     $response = Unirest\Request::get(
       "https://sjehutch-passbeemedia-shorturl.p.mashape.com/CreateUrl?real_url=".$link->url,
       array(
-        "X-Mashape-Key" => "S60LBMB0ivmshGLcOVyPhT6KTFITp1jjiszjsnQpNmujBNVPuS",
+        "X-Mashape-Key" => $config['mashape_key'],
         "Accept" => "application/xml"
       )
     );
     
-    $format = $link->type->format;
-    $quality = $link->type->quality;
+    $type = $link->type;
+    $format = $type->format;
+    $quality = $type->quality;
     $shortener = simplexml_load_string($response->raw_body);
     $shortUrl = (string)$shortener->ShortUrl;
 
