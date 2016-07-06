@@ -19,8 +19,19 @@ class YouGrabTube {
         $this->message = $response[0]->getMessage();
         $this->user = $this->message->getFrom();
         $this->chat = $this->message->getChat();
-            
+        $this->initConn();
 
+    }
+
+    private function initConn() {
+          $this->conn = new PDO(
+            "mysql:host=".$this->config['host']
+            .";dbname=".$this->config['database']
+            , $this->config['user'], 
+            $this->config['password']);
+
+          
+          $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     private function makeUrlShort($url) {
@@ -68,38 +79,47 @@ class YouGrabTube {
         return $downloadLinks;
     }
 
-    private function updateLastUserMessage($id) {
-          $conn = new PDO(
-            "mysql:host=".$this->config['host']
-            .";dbname=".$this->config['database']
-            , $this->config['user'], 
-            $this->config['password']);
+    private function updateLastMessageId($column, $id) {
+    
 
-          
-          $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-          $stmt = $conn->prepare(
-            "UPDATE last_user_message  
-             SET id = :id");
+          $stmt = $this->conn->prepare(
+            "UPDATE last_message_id  
+             SET $column = :id");
 
           $stmt->bindParam(':id', $id);
      
           $stmt->execute();
     }
 
+    private function getLastMessageId() {
+        $stmt = $this->conn->prepare("SELECT * FROM last_message_id;");
+        $stmt->execute();
+
+        $result = $stmt->fetchAll();
+
+        return $result[0];
+    }
+
 
     public function start() {
         
+        $this->updateLastMessageId(
+          "user",
+          $this->message->getMessageId());
+        
+        $lastMessageId = $this->getLastMessageId();
 
-        $this->updateLastUserMessage($this->message->getMessageId());
-          
-        if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
+        if($lastMessageId['bot'] < $lastMessageId['user']) {
+            if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
             $this->downloadLinks = YoutubeLinkGenerator::generate(
                         $this->config['mashape_key'], 
                         $this->message->getText()); 
+
             if(empty($this->downloadLinks)) {
-                $this->sendMessage('yes '.$this->getNickName()
-                  .' that was youtube url, but i think that not the valid one :(');
+                $botMessage = 
+                  $this->sendMessage(
+                    'yes '.$this->getNickName()
+                    .' that was youtube url, but i think that not the valid one :(');
             } else {
 
                 $headerMessage = 
@@ -110,36 +130,37 @@ class YouGrabTube {
 
                 $footerMessage = '<b>click the link and klik ok when telegram ask you !</b>'.PHP_EOL;
                 
-                $message = $this->sendMessage(
+                $botMessage = $this->sendMessage(
                     $headerMessage
                     .$this->makeDownloadLinks()
                     .$footerMessage
                 );
-
-                var_dump($message->getMessageId());
-    
             }
             
         } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
-            $this->sendMessage(
-              'you are such a polite person !');
-            $this->sendMessage(
-              'ok will help you to download youtube video');
-            $this->sendMessage(
-              'to download youtube video you just need to give');
-            $this->sendMessage(
-              "an youtube url to me, that's it :)");
+            $botMessage = 
+              $this->sendMessage(
+                  'you are such a polite person !'
+                  .PHP_EOL.'ok will help you to download youtube video'
+                  .PHP_EOL.'to download youtube video you just need to give'
+                  .PHP_EOL."an youtube url to me, that's it :)");
         } else {
-            $this->sendMessage(
-              '<b>WTF R U talkin bout ?'
-              .PHP_EOL.'do U speak properly, dude ?</b>');
-            $this->sendMessage(
-              'do u want to teach me speak your language ? '
-              .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
-              'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
-              .PHP_EOL.'he will glad if you want to contribute :)');
+            $botMessage = 
+              $this->sendMessage(
+                  '<b>WTF R U talkin bout ?'
+                  .PHP_EOL.'do U speak properly, dude ?</b>'
+                  .PHP_EOL.'do u want to teach me speak your language ? '
+                  .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
+                  'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
+                  .PHP_EOL.'he will glad if you want to contribute :)');
         }
 
+        $this->updateLastMessageId(
+          'bot',
+          $botMessage->getMessageId());
+  
+        }
+        
     }
 
 }
