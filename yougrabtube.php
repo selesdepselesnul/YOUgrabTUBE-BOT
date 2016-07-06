@@ -5,14 +5,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Telegram\Bot\Api;
 
 $config = parse_ini_file('yougrabtube.ini');
-$response = Unirest\Request::get("https://ytgrabber.p.mashape.com/app/get/vbb_DKn21Ig",
-  [
-    "X-Mashape-Key" => $config['mashape_key'],
-    "Accept" => "application/json"
-  ]
-);
 
-$links = $response->body->link;
 $telegram = new Api($config['telegram_bot_key']);
 
 $response = $telegram->getUpdates(
@@ -20,6 +13,17 @@ $response = $telegram->getUpdates(
 
 $message = $response[0]->getMessage();
 $chat = $message->getChat();
+$query = parse_url($message->getText())['query'];
+parse_str($query, $arrQuery);
+$videoId = $arrQuery['v'];
+$response = Unirest\Request::get("https://ytgrabber.p.mashape.com/app/get/".$videoId,
+  [
+    "X-Mashape-Key" => $config['mashape_key'],
+    "Accept" => "application/json"
+  ]
+);
+
+$links = $response->body->link;
 
 foreach ($links as $link) {
     
