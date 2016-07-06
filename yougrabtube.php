@@ -54,13 +54,22 @@ class YouGrabTube {
               .PHP_EOL]);
     }
 
-    private function sendDownloadLinks() {
-        foreach ($this->downloadLinks as $i => $downloadLink) {
-            $this->sendMessage('<b>'.($i + 1).'. </b><a href="'
-                  .$this->makeUrlShort($downloadLink['url']).'">'
-                  .$downloadLink['format'].' '.$downloadLink['quality']
-                  .'</a>');
-        }
+    private function makeDownloadLinks() {
+        $downloadLinks = 
+            array_reduce($this->downloadLinks, function($carry, $item) {
+                return $carry
+                      .'<a href="'.$this->makeUrlShort($item['url']).'">'
+                      .$item['format'].' '.$item['quality']
+                      .'</a>'
+                      .PHP_EOL;
+            });
+        return $downloadLinks;
+        // foreach ($this->downloadLinks as $i => $downloadLink) {
+        //     $this->sendMessage('<b>'.($i + 1).'. </b><a href="'
+        //           .$this->makeUrlShort($downloadLink['url']).'">'
+        //           .$downloadLink['format'].' '.$downloadLink['quality']
+        //           .'</a>');
+        // }
     }
 
     public function start() {
@@ -73,13 +82,20 @@ class YouGrabTube {
                 $this->sendMessage('yes '.$this->getNickName()
                   .' that was youtube url, but i think that not the valid one :(');
             } else {
-                $this->sendMessage(
-                  'Ok '.$this->getNickName()
-                  .', here i give u some links to download the video :');
+                $headerMessage = 
+                      PHP_EOL
+                      .'Ok '.$this->getNickName()
+                      .', here i give u some links to download the video :'
+                      .PHP_EOL;
 
-                $this->sendDownloadLinks();
-              
-                $this->sendMessage('click the link and klik ok when telegram ask you !');    
+                $footerMessage = 'click the link and klik ok when telegram ask you !'.PHP_EOL;
+                
+                $this->sendMessage(
+                    $headerMessage
+                    .$this->makeDownloadLinks()
+                    .$footerMessage
+                );
+    
             }
             
         } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
