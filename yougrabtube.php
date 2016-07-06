@@ -24,14 +24,14 @@ class YouGrabTube {
     }
 
     private function initConn() {
-          $this->conn = new PDO(
-            "mysql:host=".$this->config['host']
-            .";dbname=".$this->config['database']
-            , $this->config['user'], 
-            $this->config['password']);
+        $this->conn = new PDO(
+          "mysql:host=".$this->config['host']
+          .";dbname=".$this->config['database']
+          , $this->config['user'], 
+          $this->config['password']);
 
-          
-          $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     private function makeUrlShort($url) {
@@ -137,27 +137,27 @@ class YouGrabTube {
                 );
             }
             
-        } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
-            $botMessage = 
-              $this->sendMessage(
-                  'you are such a polite person !'
-                  .PHP_EOL.'ok will help you to download youtube video'
-                  .PHP_EOL.'to download youtube video you just need to give'
-                  .PHP_EOL."an youtube url to me, that's it :)");
-        } else {
-            $botMessage = 
-              $this->sendMessage(
-                  '<b>WTF R U talkin bout ?'
-                  .PHP_EOL.'do U speak properly, dude ?</b>'
-                  .PHP_EOL.'do u want to teach me speak your language ? '
-                  .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
-                  'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
-                  .PHP_EOL.'he will glad if you want to contribute :)');
-        }
+          } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
+              $botMessage = 
+                $this->sendMessage(
+                    'you are such a polite person !'
+                    .PHP_EOL.'ok will help you to download youtube video'
+                    .PHP_EOL.'to download youtube video you just need to give'
+                    .PHP_EOL."an youtube url to me, that's it :)");
+          } else {
+              $botMessage = 
+                $this->sendMessage(
+                    '<b>WTF R U talkin bout ?'
+                    .PHP_EOL.'do U speak properly, dude ?</b>'
+                    .PHP_EOL.'do u want to teach me speak your language ? '
+                    .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
+                    'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
+                    .PHP_EOL.'he will glad if you want to contribute :)');
+          }
 
-        $this->updateLastMessageId(
-          'bot',
-          $botMessage->getMessageId());
+          $this->updateLastMessageId(
+            'bot',
+            $botMessage->getMessageId());
   
         }
         
