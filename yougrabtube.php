@@ -141,7 +141,7 @@ class YouGrabTube {
               $botMessage = 
                 $this->sendMessage(
                     'you are such a polite person !'
-                    .PHP_EOL.'ok will help you to download youtube video'
+                    .PHP_EOL."ok i'll help you to download youtube video"
                     .PHP_EOL.'to download youtube video you just need to give'
                     .PHP_EOL."an youtube url to me, that's it :)");
           } else if(preg_match('/\/start/i', $this->message->getText())) {
