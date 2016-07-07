@@ -144,6 +144,13 @@ class YouGrabTube {
                     .PHP_EOL.'ok will help you to download youtube video'
                     .PHP_EOL.'to download youtube video you just need to give'
                     .PHP_EOL."an youtube url to me, that's it :)");
+          } else if(preg_match('/\/start/i', $this->message->getText())) {
+              $botMessage = 
+                $this->sendMessage(
+                    'what are you waiting for ?'
+                    .PHP_EOL
+                    ."give me youtube video link and i'll help you :)"
+                );
           } else {
               $botMessage = 
                 $this->sendMessage(
