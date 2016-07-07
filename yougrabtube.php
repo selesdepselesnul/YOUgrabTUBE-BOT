@@ -88,7 +88,8 @@ class YouGrabTube {
           $stmt = $this->conn->prepare(
             "UPDATE {$table}_message  
              SET id = :id,
-                 message = :message");
+                 message = :message
+             WHERE no = 0;");
 
           $stmt->bindParam(':id', $values['id']);
           $stmt->bindParam(':message', $values['message']);
@@ -138,8 +139,6 @@ class YouGrabTube {
                       .', here i give u some links to download the video :</b>'
                       .PHP_EOL;
 
-                // $footerMessage = '<b>click the link and klik ok when telegram ask you !</b>'.PHP_EOL;
-                
                 $botMessage = $this->sendMessage(
                     $headerMessage
                     .$this->makeDownloadLinks()
@@ -149,7 +148,7 @@ class YouGrabTube {
           } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
               $botMessage = 
                 $this->sendMessage(
-                    'you are such a polite person !'
+                    'you are such a polite person '.$this->getNickName()
                     .PHP_EOL."ok i'll help you to download youtube video"
                     .PHP_EOL.'to download youtube video you just need to give'
                     .PHP_EOL."an youtube url to me, that's it :)");
@@ -163,8 +162,8 @@ class YouGrabTube {
           } else {
               $botMessage = 
                 $this->sendMessage(
-                    '<b>WTF R U talkin bout ?'
-                    .PHP_EOL.'do U speak properly, dude ?</b>'
+                    'Hey '.$this->getNickName().' WTF R U talkin bout ?'
+                    .PHP_EOL.'do U speak properly, dude ?'
                     .PHP_EOL.'do u want to teach me speak your language ? '
                     .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
                     'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
