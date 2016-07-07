@@ -57,42 +57,47 @@ class YouGrabTube {
 
 
     private function sendMessage($message) {
-        $message = 
+        $lastMessage = 
           $this->telegram->sendMessage([
               'chat_id' => $this->chat->getId(),
               'parse_mode' => 'HTML', 
               'text' => PHP_EOL
                   .$message
                   .PHP_EOL]);
-        return $message;
+        return $lastMessage;
     }
 
     private function makeDownloadLinks() {
         $downloadLinks = 
             array_reduce($this->downloadLinks, function($carry, $item) {
-                return $carry
-                      .'<a href="'.$this->makeUrlShort($item['url']).'">'
-                      .$item['format'].' '.$item['quality']
-                      .'</a>'
+                return 
+                      PHP_EOL
+                      .$carry
+                      .'format: '.$item['format']
+                      .PHP_EOL.'quality: '.$item['quality']
+                      .PHP_EOL.'dl-url: '.$item['url']
+                      .PHP_EOL
                       .PHP_EOL;
             });
         return $downloadLinks;
     }
 
-    private function updateLastMessageId($column, $id) {
+    private function updateLastMessage($table, $values) {
     
 
           $stmt = $this->conn->prepare(
-            "UPDATE last_message_id  
-             SET $column = :id");
+            "UPDATE {$table}_message  
+             SET id = :id,
+                 message = :message");
 
-          $stmt->bindParam(':id', $id);
-     
+          $stmt->bindParam(':id', $values['id']);
+          $stmt->bindParam(':message', $values['message']);
+          
           $stmt->execute();
     }
 
-    private function getLastMessageId() {
-        $stmt = $this->conn->prepare("SELECT * FROM last_message_id;");
+    private function getLastMessage($table) {
+        $stmt = $this->conn->prepare("SELECT * FROM {$table}_message;");
         $stmt->execute();
 
         $result = $stmt->fetchAll();
@@ -103,13 +108,18 @@ class YouGrabTube {
 
     public function start() {
         
-        $this->updateLastMessageId(
-          "user",
-          $this->message->getMessageId());
+        $this->updateLastMessage(
+            'user',
+            [ 
+              'id' => $this->message->getMessageId(),
+              'message' => $this->message->getText()
+            ]
+        );
         
-        $lastMessageId = $this->getLastMessageId();
+        $userLastMessage = $this->getLastMessage('user');
+        $botLastMessage = $this->getLastMessage('bot');
 
-        if($lastMessageId['bot'] < $lastMessageId['user']) {
+        if($botLastMessage['id'] < $userLastMessage['id']) {
             if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
             $this->downloadLinks = YoutubeLinkGenerator::generate(
                         $this->config['mashape_key'], 
@@ -128,12 +138,11 @@ class YouGrabTube {
                       .', here i give u some links to download the video :</b>'
                       .PHP_EOL;
 
-                $footerMessage = '<b>click the link and klik ok when telegram ask you !</b>'.PHP_EOL;
+                // $footerMessage = '<b>click the link and klik ok when telegram ask you !</b>'.PHP_EOL;
                 
                 $botMessage = $this->sendMessage(
                     $headerMessage
                     .$this->makeDownloadLinks()
-                    .$footerMessage
                 );
             }
             
@@ -145,7 +154,7 @@ class YouGrabTube {
                     .PHP_EOL.'to download youtube video you just need to give'
                     .PHP_EOL."an youtube url to me, that's it :)");
           } else if(preg_match('/\/start/i', $this->message->getText())) {
-              $botMessage = 
+              $botMessage =  
                 $this->sendMessage(
                     'what are you waiting for ?'
                     .PHP_EOL
@@ -162,12 +171,15 @@ class YouGrabTube {
                     .PHP_EOL.'he will glad if you want to contribute :)');
           }
 
-          $this->updateLastMessageId(
+          $this->updateLastMessage(
             'bot',
-            $botMessage->getMessageId());
+            [
+              'id' => $botMessage->getMessageId(),
+              'message' => $botMessage->getText() 
+          ]);
   
         }
-        
+   
     }
 
 }

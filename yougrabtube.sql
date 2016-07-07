@@ -3,11 +3,20 @@ CREATE DATABASE yougrabtube;
 
 USE yougrabtube;
 
-DROP TABLE IF EXISTS last_message_id;
-CREATE TABLE last_message_id (
-	user BIGINT,
-	bot BIGINT
+DROP TABLE IF EXISTS user_message;
+CREATE TABLE user_message (
+	id BIGINT,
+	message LONGTEXT
 );
 
-INSERT INTO last_message_id
-VALUES(-999, -999);
+DROP TABLE IF EXISTS bot_message;
+CREATE TABLE bot_message (
+	id BIGINT,
+	message LONGTEXT
+);
+
+INSERT INTO user_message
+VALUES(-999, 'hello world');
+
+INSERT INTO bot_message
+VALUES(-999, 'hello world');
