@@ -1,16 +1,16 @@
 <?php
 class YoutubeUrlParser {
 	
-	const SHORT_URL = 'https://youtu.be/';
+	const SHORT_URL = '/https:\/\/youtu\.be\/.+/i';
 	const LONG_URL = '/https:\/\/www\.youtube\.com\/watch\?v=.+/i';
 
 	public function parseShort($url) {
-		$exp = explode(self::SHORT_URL, $url);
-
-		if(count($exp) > 1)
-			return $exp[1];
-		else
-			return '';
+		if(preg_match(self::SHORT_URL, $url)) {
+			$path = parse_url($url)['path'];
+			$videoId = explode('/', $path);
+			return $videoId[1];		
+		}
+		return '';
 	}
 
 	public function parseLong($url) {
@@ -19,8 +19,8 @@ class YoutubeUrlParser {
 			parse_str($query, $arrQuery);
 			$videoId = $arrQuery['v'];
 			return $videoId;	
-		} else {
-			return '';
-		}
+		} 
+		return '';
 	}
+
 }
