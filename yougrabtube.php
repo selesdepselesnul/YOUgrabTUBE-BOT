@@ -130,7 +130,8 @@ class YouGrabTube {
                 $botMessage = 
                   $this->sendMessage(
                     'yes '.$this->getNickName()
-                    .' that was youtube url, but i think that not the valid one :(');
+                    .' that was youtube url, but i think that not the valid one'
+                    .PHP_EOL.':(');
             } else {
 
                 $headerMessage = 
