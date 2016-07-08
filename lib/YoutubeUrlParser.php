@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author : Moch Deden
+ * @site : http://selesdepselesnul.com 
+ */
 class YoutubeUrlParser {
 	
 	const SHORT_URL = '/https:\/\/youtu\.be\/.+/i';

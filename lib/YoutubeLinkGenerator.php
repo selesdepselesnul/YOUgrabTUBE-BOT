@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @author : Moch Deden
+ * @site : http://selesdepselesnul.com 
+ */
 class YoutubeLinkGenerator {
 
 	public static function generateVideoId($videoUrl) {

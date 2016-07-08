@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
-// author : Moch Deden
+/**
+ * @author : Moch Deden
+ * @site : http://selesdepselesnul.com 
+ */
 require __DIR__ . '/vendor/autoload.php';
 require_once 'Config.php';
 use Telegram\Bot\Api;
