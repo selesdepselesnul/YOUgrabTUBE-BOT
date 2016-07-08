@@ -5,7 +5,11 @@ class YoutubeUrlParser {
 
 	public function parseShort($url) {
 		$exp = explode(self::SHORT_URL, $url);
-		return $exp[1];
+
+		if(count($exp) > 1)
+			return $exp[1];
+		else
+			return '';
 	}
 
 	public function parseLong($url) {

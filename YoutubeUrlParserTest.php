@@ -8,10 +8,16 @@ class YoutubeUrlParserTest extends TestCase {
 		$this->youtubeUrlParser = new YoutubeUrlParser;
 	}
 
-	public function testParseShortUrl() {
+	public function testParseShortUrlReturnVideoId() {
 		
 		$this->assertEquals('4OmL8fl_nOo', 
 			$this->youtubeUrlParser->parseShort('https://youtu.be/4OmL8fl_nOo'));
+	}
+
+	public function testParseShortUrlReturnNothing() {
+		
+		$this->assertEquals('', 
+			$this->youtubeUrlParser->parseShort('https://youtu.4OmL8fl_nOo'));
 	}
 
 	public function testParseLongUrl() {
