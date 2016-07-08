@@ -5,14 +5,11 @@
  */
 class YoutubeLinkGenerator {
 
-	public static function generateVideoId($videoUrl) {
-		$query = parse_url($videoUrl)['query'];
-		parse_str($query, $arrQuery);
-		$videoId = $arrQuery['v'];
-		return $videoId;
+	public function __construct($mashapeKey) {
+		$this->mashapeKey = $mashapeKey;
 	}
 
-	private static function generateDownloadLinks($links) {
+	private function generateReduceDownloadLinks($links) {
 		$downloadLinks = array_map(function($x) {
 			$type = $x->type;
 			return [
@@ -25,17 +22,17 @@ class YoutubeLinkGenerator {
 		return $properDownloadLinks;
 	}
 	
-	public static function generate($mashapeKey, $videoUrl) {
+	public function generate($videoUrl) {
 		$config = parse_ini_file('yougrabtube.ini');
 		$response = Unirest\Request::get(
-		  	$config['downloader_end_point'].YoutubeLinkGenerator::generateVideoId($videoUrl),
+		  	$config['downloader_end_point'].$videoUrl,
 		    [
-		      "X-Mashape-Key" => $mashapeKey,
+		      "X-Mashape-Key" => $this->mashapeKey,
 		      "Accept" => "application/json"
 		    ]
 		);
 
 		$links = $response->body->link;
-		return YoutubeLinkGenerator::generateDownloadLinks($links);
+		return $this->generateReduceDownloadLinks($links);
 	}
 }

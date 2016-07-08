@@ -14,6 +14,8 @@ class YouGrabTube {
         
         $this->config = $config;
         $this->telegram = new Api($this->config['telegram_bot_key']);
+        $this->youtubeLinkGenerator = new YoutubeLinkGenerator($config['mashape_key']);
+        $this->youtubeUrlParser = new YoutubeUrlParser;
 
         $response = $this->telegram->getUpdates(
           ['offset' => -1, 'limit' => 1, 'timeout' => 0]);
@@ -121,64 +123,92 @@ class YouGrabTube {
         
         $userLastMessage = $this->getLastMessage('user');
         $botLastMessage = $this->getLastMessage('bot');
+        $userText = $this->message->getText();
 
         if($botLastMessage['id'] < $userLastMessage['id']) {
-            if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
-            $this->downloadLinks = YoutubeLinkGenerator::generate(
-                        $this->config['mashape_key'], 
-                        $this->message->getText()); 
+          //   if(preg_match('/https:\/\/www\.youtube\.com\/watch\?v=.+/i', $this->message->getText())) {
+          //   $this->downloadLinks = YoutubeLinkGenerator::generate(
+          //               $this->config['mashape_key'], 
+          //               $this->message->getText()); 
 
-            if(empty($this->downloadLinks)) {
-                $botMessage = 
-                  $this->sendMessage(
-                    'yes '.$this->getNickName()
-                    .' that was youtube url, but i think that not the valid one'
-                    .PHP_EOL.':(');
-            } else {
+          //   if(empty($this->downloadLinks)) {
+          //       $botMessage = 
+          //         $this->sendMessage(
+          //           'yes '.$this->getNickName()
+          //           .' that was youtube url, but i think that not the valid one'
+          //           .PHP_EOL.':(');
+          //   } else {
 
-                $headerMessage = 
-                      PHP_EOL
-                      .'<b>Ok '.$this->getNickName()
-                      .', here i give u some links to download the video :</b>'
-                      .PHP_EOL;
+          //       $headerMessage = 
+          //             PHP_EOL
+          //             .'<b>Ok '.$this->getNickName()
+          //             .', here i give u some links to download the video :</b>'
+          //             .PHP_EOL;
 
-                $botMessage = $this->sendMessage(
-                    $headerMessage
-                    .$this->makeDownloadLinks()
-                );
-            }
+          //       $botMessage = $this->sendMessage(
+          //           $headerMessage
+          //           .$this->makeDownloadLinks()
+          //       );
+          //   }
             
-          } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
-              $botMessage = 
-                $this->sendMessage(
-                    'you are such a polite person '.$this->getNickName()
-                    .PHP_EOL."ok i'll help you to download youtube video"
-                    .PHP_EOL.'to download youtube video you just need to give'
-                    .PHP_EOL."an youtube url to me, that's it :)");
-          } else if(preg_match('/\/start/i', $this->message->getText())) {
-              $botMessage =  
-                $this->sendMessage(
-                    'what are you waiting for ?'
-                    .PHP_EOL
-                    ."give me youtube video link and i'll help you :)"
-                );
-          } else {
-              $botMessage = 
-                $this->sendMessage(
-                    'Hey '.$this->getNickName().' WTF R U talkin bout ?'
-                    .PHP_EOL.'do U speak properly, dude ?'
-                    .PHP_EOL.'do u want to teach me speak your language ? '
-                    .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
-                    'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
-                    .PHP_EOL.'he will glad if you want to contribute :)');
+          // } elseif (preg_match('/(please)?(\s)*help(\s)*(me)?/i', $this->message->getText())) {
+          //     $botMessage = 
+          //       $this->sendMessage(
+          //           'you are such a polite person '.$this->getNickName()
+          //           .PHP_EOL."ok i'll help you to download youtube video"
+          //           .PHP_EOL.'to download youtube video you just need to give'
+          //           .PHP_EOL."an youtube url to me, that's it :)");
+          // } else if(preg_match('/\/start/i', $this->message->getText())) {
+          //     $botMessage =  
+          //       $this->sendMessage(
+          //           'what are you waiting for ?'
+          //           .PHP_EOL
+          //           ."give me youtube video link and i'll help you :)"
+          //       );
+          // } else {
+          //     $botMessage = 
+          //       $this->sendMessage(
+          //           'Hey '.$this->getNickName().' WTF R U talkin bout ?'
+          //           .PHP_EOL.'do U speak properly, dude ?'
+          //           .PHP_EOL.'do u want to teach me speak your language ? '
+          //           .PHP_EOL.'if yes, please contribute to my creator repo => <a href="'.
+          //           'https://github.com/selesdepselesnul'.'">Moch Deden</a>'
+          //           .PHP_EOL.'he will glad if you want to contribute :)');
+          // }
+
+          if(preg_match(YoutubeUrlParser::SHORT_URL, $userText)) {
+              $videoUrl = $this->youtubeUrlParser->parseShort($userText);
+              $this->downloadLinks = $this->youtubeLinkGenerator->generate($videoUrl);
+
+
+              if(empty($this->downloadLinks)) {
+                  $botMessage = 
+                    $this->sendMessage(
+                      'yes '.$this->getNickName()
+                      .' that was youtube url, but i think that not the valid one'
+                      .PHP_EOL.':(');
+              } else {
+
+                  $headerMessage = 
+                        PHP_EOL
+                        .'<b>Ok '.$this->getNickName()
+                        .', here i give u some links to download the video :</b>'
+                        .PHP_EOL;
+                  var_dump($this->makeDownloadLinks());      
+                  $botMessage = $this->sendMessage(
+                      $headerMessage
+                      .$this->makeDownloadLinks()
+                  );
+              }
+
           }
 
-          $this->updateLastMessage(
-            'bot',
-            [
-              'id' => $botMessage->getMessageId(),
-              'message' => $botMessage->getText() 
-          ]);
+          // $this->updateLastMessage(
+          //   'bot',
+          //   [
+          //     'id' => $botMessage->getMessageId(),
+          //     'message' => $botMessage->getText() 
+          // ]);
   
         }
    
