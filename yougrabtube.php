@@ -117,11 +117,27 @@ class YouGrabTube {
             .', here i give u some links to download the video :</b>'
             .PHP_EOL;
         var_dump($this->makeDownloadLinks());      
-        $this->botMessage = $this->sendMessage(
+        $botMessage = $this->sendMessage(
             $headerMessage
             .$this->makeDownloadLinks()
         );
+        return $botMessage;
     }
+
+    private function processVideoUrl($videoUrl) {
+        $this->downloadLinks = $this->youtubeLinkGenerator->generate($videoUrl);
+
+        if(empty($this->downloadLinks)) 
+            $botMessage = 
+                $this->sendMessage(
+                  'yes '.$this->getNickName()
+                  .' that was youtube url, but i think that not the valid one'
+                  .PHP_EOL.':(');
+        else
+            $botMessage = $this->sendDownloadLink();
+        return $botMessage;
+    }
+
     public function start() {
         
         $this->updateLastMessage(
@@ -142,24 +158,24 @@ class YouGrabTube {
                 $videoUrl = $this->youtubeUrlParser->parseShort($userText);
             else if(preg_match(YoutubeUrlParser::LONG_URL, $userText)) 
                 $videoUrl = $this->youtubeUrlParser->parseLong($userText);
-            
-            $this->downloadLinks = $this->youtubeLinkGenerator->generate($videoUrl);
+            else
+                $videoUrl = null;
 
-            if(empty($this->downloadLinks)) 
-                $this->botMessage = 
+            if(is_null($videoUrl)) 
+                $botMessage = 
                   $this->sendMessage(
-                    'yes '.$this->getNickName()
-                    .' that was youtube url, but i think that not the valid one'
-                    .PHP_EOL.':(');
+                    "That's not even an youtube url !");
             else 
-                $this->sendDownloadLink();
-            
+                $botMessage = $this->processVideoUrl($videoUrl);
+             
+
             $this->updateLastMessage(
-            'bot',
-            [
-              'id' => $this->botMessage->getMessageId(),
-              'message' => $this->botMessage->getText() 
-            ]);
+                'bot',
+                [
+                  'id' => $botMessage->getMessageId(),
+                  'message' => $botMessage->getText() 
+                ]
+            );
         }
     }
 }
